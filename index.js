@@ -11,7 +11,7 @@ exports.verifyEmail = async (event) => {
   const { email, first_name, last_name, token } = snsMessage;
 
   // Generate the verification link
-  const verificationLink = `https://nikitha-kambhampati.me/verify?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
+  const verificationLink = `https://${domain}.nikitha-kambhampati.me/verify?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
 
   const emailData = {
     from: 'Exciting WebApp <no-reply@nikitha-kambhampati.com>',
