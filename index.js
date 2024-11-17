@@ -3,15 +3,14 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const DOMAIN = process.env.MAILGUN_DOMAIN;
-const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: process.env.DOMAIN });
+const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: process.env.MAILGUN_DOMAIN });
 
 exports.verifyEmail = async (event) => {
   const snsMessage = JSON.parse(event.Records[0].Sns.Message);
   const { email, first_name, last_name, token } = snsMessage;
 
   // Generate the verification link
-  const verificationLink = `https://${domain}.nikitha-kambhampati.me/verify?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
+  const verificationLink = `https://${process.env.DOMAIN}.nikitha-kambhampati.me/verify?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
 
   const emailData = {
     from: 'Exciting WebApp <no-reply@nikitha-kambhampati.com>',
