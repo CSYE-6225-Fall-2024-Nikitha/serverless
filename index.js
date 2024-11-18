@@ -13,7 +13,7 @@ exports.verifyEmail = async (event) => {
   const verificationLink = `http://${process.env.DOMAIN}.nikitha-kambhampati.me/verify?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
 
   const emailData = {
-    from: 'Exciting WebApp <no-reply@nikitha-kambhampati.com>',
+    from: `Exciting WebApp <no-reply@${process.env.DOMAIN}.nikitha-kambhampati.me>`,
     to: email,
     subject: `Welcome, ${first_name}! Please Verify Your Email`,
     html: `
