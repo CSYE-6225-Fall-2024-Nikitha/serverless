@@ -1,63 +1,58 @@
 const mailgun = require('mailgun-js');
-const { Sequelize, DataTypes } = require('sequelize');
 const dotenv = require('dotenv');
-
 
 dotenv.config();
 
-// Configure Mailgun
-const DOMAIN = process.env.MAILGUN_DOMAIN;
-const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: DOMAIN });
-
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
-  {
-    host: process.env.DB_HOST,
-    dialect: 'postgres',
-    port: process.env.DB_PORT,
-  }
-);
+const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: process.env.MAILGUN_DOMAIN });
 
 exports.verifyEmail = async (event) => {
-  const { email, token, userName } = JSON.parse(event.body);
+  const snsMessage = JSON.parse(event.Records[0].Sns.Message);
+  const { email, first_name, last_name, token } = snsMessage;
 
-  // Generate verification link
-  const verificationLink = `https://nikitha-kambhampati.me/verify/${token}`;
+  // Generate the verification link
+  const verificationLink = `http://${process.env.DOMAIN}.nikitha-kambhampati.me/verify?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
 
   const emailData = {
-    from: 'Exciting WebApp <no-reply@yourdomain.com>',
+    from: `CSYE6225 WebApp Support <webapp@${process.env.DOMAIN}.nikitha-kambhampati.me>`,
     to: email,
-    subject: `Welcome, ${userName}! Please Verify Your Email`,
+    subject: `Welcome, ${first_name}! Confirm your WebApp registration please!`,
     html: `
-  <p>Hi ${userName},</p>
-  <p>Thank you for registering with Nikitha's WebApp! We're excited to have you on board.</p>
-  <p>To complete your registration, please click the link below to verify your email address:</p>
-  <p><a href="${verificationLink}" style="color: #3498db; text-decoration: none; font-weight: bold;">Verify Your Email</a></p>
-  <p>This link will expire in 2 minutes, so please make sure to verify your email as soon as possible.</p>
-  <p>If you did not sign up for this account, please disregard this email.</p>
-  <p>Best regards,<br>Exciting WebApp Team</p>
-`
-
+      <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; margin: 0; padding: 0;">
+          <table align="center" width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #dddddd; border-radius: 8px; overflow: hidden;">
+            <tr>
+              <td style="padding: 20px; text-align: center; background-color: #0073e6; color: #ffffff;">
+                <h1 style="margin: 0; font-size: 24px;">Welcome to WebApp, ${first_name}!</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 20px;">
+                <p>Hi <strong>${first_name} ${last_name}</strong>,</p>
+                <p>Thank you for your interest in Webapp !!</p>
+                <p>Please click here to confirm your registration</p>
+                <p style="text-align: center;">
+                  <a href="${verificationLink}" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; background-color: #0073e6; text-decoration: none; border-radius: 4px;">Verify Your Email</a>
+                </p>
+                <p>If you didn’t sign up for WebApp, please ignore this email.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; text-align: center; background-color: #f1f1f1; font-size: 12px; color: #666;">
+                <p>&copy; ${new Date().getFullYear()} WebApp. All rights reserved.</p>
+                <p style="margin: 0;">WebApp, 123 WebApp Lane, Tech City, USA</p>
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `
   };
+  
 
   try {
+    // Send the verification email
     await mg.messages().send(emailData);
     console.log(`Verification email sent to ${email}`);
-
-    const currentTime = new Date();
-
-    await EmailTrack.create({
-      email_id: null,
-      verification_token: token,
-      verification_link: verificationLink,
-      expires_at: new Date(currentTime.getTime() + 2 * 60000),  
-      sent_date: currentTime,
-      sns_message_id: event.messageId,  
-      userId: userName,
-      is_verified: false,  
-    });
 
     return {
       statusCode: 200,
@@ -65,22 +60,10 @@ exports.verifyEmail = async (event) => {
     };
   } catch (error) {
     console.error('Error sending email:', error);
-
-    await EmailTrack.create({
-      email_id: null, 
-      verification_token: token,
-      verification_link: null,
-      expires_at: new Date(),
-      sent_date: new Date(),
-      sns_message_id: event.messageId, 
-      userId: userName, 
-      is_verified: false,
-      errorMessage: error.message || 'Failed to send email',
-    });
-
     return {
       statusCode: 500,
       body: JSON.stringify({ message: 'Failed to send verification email.' }),
     };
   }
 };
+
