@@ -51,7 +51,6 @@ npm install
 ### **2. Components**
 - **SNS**: Simple Notification Service for event-driven invocation.
 - **Lambda**: Serverless function for processing email verification.
-- **RDS Instance**: Relational Database Service to track email activities.
 
 ---
 
@@ -61,13 +60,6 @@ npm install
 - **Send Verification Email**  
    - Use **AWS SES** (Simple Email Service) or another email service.
    - Generate a link with a unique token and expiry time (2 minutes).
-- **Track Email Activity in RDS**  
-   - Log the following details into the database:
-     - Email address
-     - Token
-     - Sent timestamp
-     - Expiry timestamp
-     - Verification status (verified/unverified)
 
 ---
 
@@ -85,24 +77,10 @@ npm install
    SNS_TOPIC_ARN=<your-sns-topic-arn>
    ```
 
--  **Database Schema**
-   Use the following schema for tracking email activities:
-   ```sql
-   CREATE TABLE email_verification (
-       id SERIAL PRIMARY KEY,
-       email VARCHAR(255) NOT NULL,
-       token VARCHAR(255) NOT NULL,
-       sent_at TIMESTAMP NOT NULL,
-       expires_at TIMESTAMP NOT NULL,
-       verified BOOLEAN DEFAULT FALSE
-   );
-   ```
-
 - **IAM Roles**
    Ensure your Lambda function has the necessary permissions:
    - Access to publish messages to the SNS Topic.
    - Access to send emails using AWS SES.
-   - Access to connect to the RDS database.
 
 ---
 
@@ -150,9 +128,6 @@ npm install
 3. Verify email logs in the RDS database after testing.
 
 ---
-
-## **License**
-This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ---
 

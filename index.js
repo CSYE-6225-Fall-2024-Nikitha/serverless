@@ -29,7 +29,7 @@ exports.verifyEmail = async (event) => {
               <td style="padding: 20px;">
                 <p>Hi <strong>${first_name} ${last_name}</strong>,</p>
                 <p>Thank you for your interest in Webapp !!</p>
-                <p>Please click here to confirm your registration</p>
+                <p>Kindly, Confirm your registration here!</p>
                 <p style="text-align: center;">
                   <a href="${verificationLink}" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; background-color: #0073e6; text-decoration: none; border-radius: 4px;">Verify Your Email</a>
                 </p>
